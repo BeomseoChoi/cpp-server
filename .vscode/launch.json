@@ -1,0 +1,49 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "(gdb) Launch",            // 디버그 환경 이름
+            "type": "cppdbg",                  // C++ 디버깅 타입 설정
+            "request": "launch",               // 실행/런치 모드
+            "program": "${workspaceFolder}/bin/cpp-server", // 디버깅할 실행 파일 경로
+            "args": [],                        // 프로그램에 전달할 인수 (필요에 따라 수정)
+            "stopAtEntry": false,              // true면 프로그램이 시작할 때 중단됨
+            "cwd": "${workspaceFolder}",       // 현재 작업 디렉토리 설정
+            "environment": [],                 // 환경 변수 설정
+            "externalConsole": false,          // 외부 콘솔 사용 여부
+            "MIMode": "gdb",                   // 사용할 디버거 모드 (GDB)
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Skip stepping into std:: functions",
+                    "text": "skip file /usr/include/c++/*"
+                }
+            ],
+            "preLaunchTask": "build",          // 디버그 전에 실행할 작업 (빌드 스크립트 등)
+            "miDebuggerPath": "/usr/bin/gdb",  // GDB 경로 (Linux의 경우 기본적으로 설치된 경로)
+            "miDebuggerArgs": "",
+            "logging": {
+                "moduleLoad": false,
+                "trace": false,
+                "engineLogging": false,
+                "programOutput": true,
+                "exceptions": true
+            },
+            "linux": {
+                "MIMode": "gdb",
+                "miDebuggerPath": "/usr/bin/gdb"
+            },
+            "osx": {
+                "MIMode": "lldb"
+            },
+            "windows": {
+                "MIMode": "gdb",
+                "miDebuggerPath": "C:/MinGW/bin/gdb.exe" // Windows에서 GDB 경로 (MinGW 설치 필요)
+            }
+        }
+    ]
+}

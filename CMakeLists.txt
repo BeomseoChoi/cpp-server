@@ -7,17 +7,19 @@ project (cpp-server)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-
-
 # include 디렉토리 설정
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
-# 소스 파일 리스트 설정
-file(GLOB SOURCES
+# 재귀적으로 src 디렉토리와 하위 디렉토리의 모든 .cpp 파일 찾기
+file(GLOB_RECURSE SOURCES
     ${PROJECT_SOURCE_DIR}/src/*.cpp
 )
+
 
 # 출력 디렉토리 설정
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
 add_executable(cpp-server ${SOURCES})
+
+# PCH 파일 설정 (PROJECT_SOURCE_DIR을 이용하여 include 디렉토리 경로를 설정)
+target_precompile_headers(cpp-server PRIVATE ${PROJECT_SOURCE_DIR}/include/pch.h)
