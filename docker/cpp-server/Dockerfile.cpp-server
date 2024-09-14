@@ -1,0 +1,16 @@
+# Step 1: Base image
+FROM ubuntu:22.04
+SHELL ["/bin/bash", "-c"]
+
+# Step 3: Set the working directory inside the container
+WORKDIR /root
+
+COPY docker/cpp-server/env.sh /etc/profile.d/env.sh
+COPY docker/cpp-server/alias.sh /etc/profile.d/alias.sh
+RUN echo "source /etc/profile.d/env.sh" >> ~/.bashrc && \
+    echo "source /etc/profile.d/alias.sh" >> ~/.bashrc
+
+    # Step 2: Install dependencies
+RUN apt-get update && \
+    apt-get install -y build-essential cmake g++ && \
+    apt-get clean

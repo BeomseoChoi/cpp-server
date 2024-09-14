@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  service.cpp-server:
+    container_name: cpp-server
+    build:
+      context: ../ # Project Directory. The current path in a Dockerfile will be set to the context, NOT the directory where Dockerfile is.
+      dockerfile: docker/cpp-server/Dockerfile.cpp-server # Relative to the context
+    working_dir: /root/project
+    volumes:
+      - ../:/root/project
+    tty: true
