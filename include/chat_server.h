@@ -20,6 +20,5 @@ namespace app {
 
     private:
         uint32 generate_session();
-
     };
 }
