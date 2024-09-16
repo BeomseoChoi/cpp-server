@@ -21,6 +21,8 @@ file(GLOB_RECURSE SOURCES
 # pugixml 소스 파일 추가
 list(APPEND SOURCES ${PROJECT_SOURCE_DIR}/lib/pugixml-1.14/src/pugixml.cpp)
 include_directories(${PROJECT_SOURCE_DIR}/lib/pugixml-1.14/include)
+list(APPEND SOURCES ${PROJECT_SOURCE_DIR}/lib/xxml/src/xxml.cpp)
+include_directories(${PROJECT_SOURCE_DIR}/lib/xxml/include)
 
 # 출력 디렉토리 설정
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)

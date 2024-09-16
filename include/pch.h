@@ -12,5 +12,6 @@
 #include <unordered_map>
 #include <mutex>
 #include <functional>  // std::bind를 사용하기 위한 헤더
+#include <memory>
 
 #include "types.h"

@@ -12,5 +12,6 @@ RUN echo "source /etc/profile.d/env.sh" >> ~/.bashrc && \
 
     # Step 2: Install dependencies
 RUN apt-get update && \
-    apt-get install -y build-essential cmake g++ && \
+    apt-get install -y \
+    build-essential cmake g++ gdb && \
     apt-get clean
