@@ -1,7 +1,11 @@
 #pragma once
 
+namespace xxml{
+    bool validate(const std::string& xml);
+}
 namespace xxml::builder
 {
+
     //////////////////////////////
     // XML CONTENT
     //////////////////////////////
@@ -104,4 +108,5 @@ namespace xxml::builder
     public:
         virtual std::string build() override;
     };
+
 }

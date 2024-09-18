@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 #include <unordered_map>
+#include <expat.h> // for validation
 #include "xxml.h"
 
 //////////////////////////////
@@ -147,7 +148,7 @@ std::shared_ptr<xxml::builder::Tag> xxml::builder::Tag::attribute(const char *at
     {
         return nullptr;
     }
-    
+
     std::string replaced_text = replace_to_entity_reference(value);
 
     attributes.push_back({attr, replaced_text.c_str()});
@@ -159,7 +160,7 @@ std::shared_ptr<xxml::builder::Tag> xxml::builder::Tag::text(const char *value)
 {
     std::string replaced_text = replace_to_entity_reference(value);
     const int next_level = get_level() + 1;
-    
+
     std::shared_ptr<xxml::builder::Text> new_text = std::make_shared<xxml::builder::Text>(replaced_text.c_str(), next_level);
     children.push_back(new_text);
 
@@ -254,3 +255,28 @@ std::string xxml::builder::Builder::build()
     return total_xml.str();
 }
 #pragma endregion
+
+bool xxml::validate(const std::string &xml)
+{
+    static XML_Parser parser = XML_ParserCreate(NULL);
+    if (!parser)
+    {
+        std::cerr << "Couldn't allocate memory for parser\n";
+        return 1;
+    }
+
+    // 콜백 함수 설정
+    XML_SetElementHandler(parser, nullptr, nullptr);
+
+    // XML 데이터를 파싱
+    if (XML_Parse(parser, xml.c_str(), xml.length(), XML_TRUE) == XML_STATUS_ERROR)
+    {
+        std::cerr << "XML parse error: " << XML_ErrorString(XML_GetErrorCode(parser)) << std::endl;
+        return false;
+    }
+
+    // 파서 해제
+    // XML_ParserFree(parser);
+
+    return true;
+}
