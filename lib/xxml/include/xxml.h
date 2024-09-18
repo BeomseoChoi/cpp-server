@@ -1,6 +1,6 @@
 #pragma once
 
-namespace xxml
+namespace xxml::builder
 {
     //////////////////////////////
     // XML CONTENT
@@ -15,14 +15,14 @@ namespace xxml
         };
 
     public:
-        XmlContent(xxml::XmlContent::Type type, int level);
+        XmlContent(xxml::builder::XmlContent::Type type, int level);
         virtual ~XmlContent() = 0;
 
     public:
         virtual std::string build() = 0;
 
     protected:
-        xxml::XmlContent::Type get_type();
+        xxml::builder::XmlContent::Type get_type();
         int get_level();
 
         void align_tab(std::stringstream &xml);
@@ -30,7 +30,7 @@ namespace xxml
         std::string replace_to_entity_reference(const std::string &input);
 
     private:
-        xxml::XmlContent::Type type;
+        xxml::builder::XmlContent::Type type;
         int level;
 
 
@@ -65,41 +65,41 @@ namespace xxml
         };
 
     public:
-        Tag(std::shared_ptr<xxml::Tag> parents, const char *name, xxml::Tag::End end, int level);
+        Tag(std::shared_ptr<xxml::builder::Tag> parents, const char *name, xxml::builder::Tag::End end, int level);
         virtual ~Tag() override;
 
     public:
-        std::shared_ptr<xxml::Tag> tag(const char *name, xxml::Tag::End end);
-        std::shared_ptr<xxml::Tag> attribute(const char *attr, const char *value);
-        std::shared_ptr<xxml::Tag> text(const char *value);
-        std::shared_ptr<xxml::Tag> close();
+        std::shared_ptr<xxml::builder::Tag> tag(const char *name, xxml::builder::Tag::End end);
+        std::shared_ptr<xxml::builder::Tag> attribute(const char *attr, const char *value);
+        std::shared_ptr<xxml::builder::Tag> text(const char *value);
+        std::shared_ptr<xxml::builder::Tag> close();
 
         virtual std::string build() override;
 
     private:
     protected:
-        std::weak_ptr<xxml::Tag> parents;
-        std::vector<std::shared_ptr<xxml::XmlContent>> children;
+        std::weak_ptr<xxml::builder::Tag> parents;
+        std::vector<std::shared_ptr<xxml::builder::XmlContent>> children;
 
     private:
         std::string name;
-        xxml::Tag::End end;
+        xxml::builder::Tag::End end;
         std::vector<std::pair<std::string, std::string>> attributes;
     };
 
     //////////////////////////////
     // BUILDER
     //////////////////////////////
-    class Builder : public xxml::Tag
+    class Builder : public xxml::builder::Tag
     {
     public:
         Builder();
         virtual ~Builder() override = default;
 
     public:
-        std::shared_ptr<xxml::Tag> attribute(const char *attr, const char *value) = delete;
-        std::shared_ptr<xxml::Tag> value(const char *value) = delete;
-        std::shared_ptr<xxml::Tag> close() = delete;
+        std::shared_ptr<xxml::builder::Tag> attribute(const char *attr, const char *value) = delete;
+        std::shared_ptr<xxml::builder::Tag> value(const char *value) = delete;
+        std::shared_ptr<xxml::builder::Tag> close() = delete;
 
     public:
         virtual std::string build() override;

@@ -11,26 +11,26 @@
 
 #pragma region XML CONTENT
 
-xxml::XmlContent::XmlContent(xxml::XmlContent::Type type, int level)
+xxml::builder::XmlContent::XmlContent(xxml::builder::XmlContent::Type type, int level)
     : type(type), level(level)
 {
 }
 
-xxml::XmlContent::~XmlContent()
+xxml::builder::XmlContent::~XmlContent()
 {
 }
 
-xxml::XmlContent::Type xxml::XmlContent::get_type()
+xxml::builder::XmlContent::Type xxml::builder::XmlContent::get_type()
 {
     return type;
 }
 
-int xxml::XmlContent::get_level()
+int xxml::builder::XmlContent::get_level()
 {
     return level;
 }
 
-void xxml::XmlContent::align_tab(std::stringstream &xml)
+void xxml::builder::XmlContent::align_tab(std::stringstream &xml)
 {
     const int level = get_level();
     for (int i = 0; i < level; ++i)
@@ -39,7 +39,7 @@ void xxml::XmlContent::align_tab(std::stringstream &xml)
     }
 }
 
-bool xxml::XmlContent::validate_no_space(const std::string &input)
+bool xxml::builder::XmlContent::validate_no_space(const std::string &input)
 {
     for (char ch : input)
     {
@@ -52,7 +52,7 @@ bool xxml::XmlContent::validate_no_space(const std::string &input)
     return true; // 문제가 없으면 true 반환
 }
 
-std::string xxml::XmlContent::replace_to_entity_reference(const std::string &input)
+std::string xxml::builder::XmlContent::replace_to_entity_reference(const std::string &input)
 {
     static std::unordered_map<std::string, std::string> entity_map = {
         // TODO: 유니코드
@@ -86,16 +86,16 @@ std::string xxml::XmlContent::replace_to_entity_reference(const std::string &inp
 //////////////////////////////
 
 #pragma region TEXT
-xxml::Text::Text(const char *text, int level)
-    : xxml::XmlContent(xxml::XmlContent::Type::text, level), text(text)
+xxml::builder::Text::Text(const char *text, int level)
+    : xxml::builder::XmlContent(xxml::builder::XmlContent::Type::text, level), text(text)
 {
 }
 
-xxml::Text::~Text()
+xxml::builder::Text::~Text()
 {
 }
 
-std::string xxml::Text::build()
+std::string xxml::builder::Text::build()
 {
     std::stringstream this_xml;
 
@@ -112,18 +112,18 @@ std::string xxml::Text::build()
 
 #pragma region TAG
 
-xxml::Tag::Tag(std::shared_ptr<xxml::Tag> parents, const char *name, xxml::Tag::End end, int level)
-    : XmlContent(xxml::XmlContent::Type::tag, level), parents(parents), name(name), end(end)
+xxml::builder::Tag::Tag(std::shared_ptr<xxml::builder::Tag> parents, const char *name, xxml::builder::Tag::End end, int level)
+    : XmlContent(xxml::builder::XmlContent::Type::tag, level), parents(parents), name(name), end(end)
 {
 }
 
-xxml::Tag::~Tag()
+xxml::builder::Tag::~Tag()
 {
 }
 
-std::shared_ptr<xxml::Tag> xxml::Tag::tag(const char *name, xxml::Tag::End end)
+std::shared_ptr<xxml::builder::Tag> xxml::builder::Tag::tag(const char *name, xxml::builder::Tag::End end)
 {
-    if (this->end == xxml::Tag::End::self_closing)
+    if (this->end == xxml::builder::Tag::End::self_closing)
     {
         return nullptr;
     }
@@ -135,13 +135,13 @@ std::shared_ptr<xxml::Tag> xxml::Tag::tag(const char *name, xxml::Tag::End end)
 
     const int next_level = get_level() + 1;
 
-    std::shared_ptr<xxml::Tag> new_tag = std::make_shared<xxml::Tag>(shared_from_this(), name, end, next_level);
+    std::shared_ptr<xxml::builder::Tag> new_tag = std::make_shared<xxml::builder::Tag>(shared_from_this(), name, end, next_level);
     children.push_back(new_tag);
 
     return new_tag;
 }
 
-std::shared_ptr<xxml::Tag> xxml::Tag::attribute(const char *attr, const char *value)
+std::shared_ptr<xxml::builder::Tag> xxml::builder::Tag::attribute(const char *attr, const char *value)
 {
     if (!validate_no_space(attr))
     {
@@ -155,23 +155,23 @@ std::shared_ptr<xxml::Tag> xxml::Tag::attribute(const char *attr, const char *va
     return shared_from_this();
 }
 
-std::shared_ptr<xxml::Tag> xxml::Tag::text(const char *value)
+std::shared_ptr<xxml::builder::Tag> xxml::builder::Tag::text(const char *value)
 {
     std::string replaced_text = replace_to_entity_reference(value);
     const int next_level = get_level() + 1;
     
-    std::shared_ptr<xxml::Text> new_text = std::make_shared<xxml::Text>(replaced_text.c_str(), next_level);
+    std::shared_ptr<xxml::builder::Text> new_text = std::make_shared<xxml::builder::Text>(replaced_text.c_str(), next_level);
     children.push_back(new_text);
 
     return shared_from_this();
 }
 
-std::shared_ptr<xxml::Tag> xxml::Tag::close()
+std::shared_ptr<xxml::builder::Tag> xxml::builder::Tag::close()
 {
     return parents.lock();
 }
 
-std::string xxml::Tag::build()
+std::string xxml::builder::Tag::build()
 {
     std::stringstream this_xml;
 
@@ -193,7 +193,7 @@ std::string xxml::Tag::build()
     /**
      * "<tag_name attr1=val1 attr2=val2/>"
      */
-    if (end == xxml::Tag::End::self_closing)
+    if (end == xxml::builder::Tag::End::self_closing)
     {
         this_xml << "/>";
         return this_xml.str();
@@ -212,7 +212,7 @@ std::string xxml::Tag::build()
      *      texts
      *      children's tags"
      */
-    for (std::shared_ptr<xxml::XmlContent> child : children)
+    for (std::shared_ptr<xxml::builder::XmlContent> child : children)
     {
         std::string child_xml = child->build();
         this_xml << child_xml;
@@ -236,17 +236,17 @@ std::string xxml::Tag::build()
 //////////////////////////////
 
 #pragma region BUILDER
-xxml::Builder::Builder()
-    : xxml::Tag(nullptr, "builder", xxml::Tag::End::regular, -1)
+xxml::builder::Builder::Builder()
+    : xxml::builder::Tag(nullptr, "builder", xxml::builder::Tag::End::regular, -1)
 {
 }
 
-std::string xxml::Builder::build()
+std::string xxml::builder::Builder::build()
 {
     std::stringstream total_xml;
     for (int i = 0; i < children.size(); ++i)
     {
-        std::shared_ptr<xxml::XmlContent> child = children[i];
+        std::shared_ptr<xxml::builder::XmlContent> child = children[i];
         std::string child_xml = child->build();
         total_xml << child_xml;
     }
