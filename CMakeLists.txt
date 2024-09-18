@@ -22,13 +22,16 @@ file(GLOB_RECURSE SOURCES
 list(APPEND SOURCES ${PROJECT_SOURCE_DIR}/lib/pugixml-1.14/src/pugixml.cpp)
 include_directories(${PROJECT_SOURCE_DIR}/lib/pugixml-1.14/include)
 list(APPEND SOURCES ${PROJECT_SOURCE_DIR}/lib/xxml/src/xxml.cpp)
+list(APPEND SOURCES ${PROJECT_SOURCE_DIR}/lib/xxml/src/xxml_stream_reader.cpp)
 include_directories(${PROJECT_SOURCE_DIR}/lib/xxml/include)
+
+find_package(EXPAT REQUIRED)
 
 # 출력 디렉토리 설정
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 
 # 실행 파일 생성
 add_executable(cpp-server ${SOURCES})
-
+target_link_libraries(cpp-server PUBLIC EXPAT::EXPAT)
 # PCH 파일 설정 (PROJECT_SOURCE_DIR을 이용하여 include 디렉토리 경로를 설정)
 target_precompile_headers(cpp-server PRIVATE ${PROJECT_SOURCE_DIR}/include/pch.h)

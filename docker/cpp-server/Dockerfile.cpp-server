@@ -41,8 +41,12 @@ RUN echo "source /etc/profile.d/env.sh" >> ~/.bashrc && \
 ##############################
 RUN apt-get update && \
     apt-get install -y \
+    # Git
     git \
-    build-essential cmake g++ gdb && \
+    # C++
+    build-essential cmake g++ gdb \
+    # expat lib : XML SAX parser.
+    libexpat1-dev && \ 
     apt-get clean
 
 RUN git config --global user.name $GITHUB_NAME && \
