@@ -2,16 +2,50 @@
 FROM ubuntu:22.04
 SHELL ["/bin/bash", "-c"]
 
-# Step 3: Set the working directory inside the container
-WORKDIR /root
+##############################
+# SET ARGS
+##############################
+ARG USERNAME=beomseochoi
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
 
+ARG GITHUB_NAME="beomseochoi"
+ARG GITHUB_EMAIL="beomseo0707@gmial.com"
+
+##############################
+# SET USER
+##############################
+
+RUN groupadd --gid $USER_GID $USERNAME \
+    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
+    && apt-get update \
+    && apt-get install -y sudo \
+    && echo $USERNAME ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/$USERNAME \
+    && chmod 0440 /etc/sudoers.d/$USERNAME
+
+##############################
+# SET WORKING DIR
+##############################
+WORKDIR /home/$USERNAME
+
+##############################
+# SET ENV AND ALIAS TO ~/.BASHRC
+##############################
 COPY docker/cpp-server/env.sh /etc/profile.d/env.sh
 COPY docker/cpp-server/alias.sh /etc/profile.d/alias.sh
 RUN echo "source /etc/profile.d/env.sh" >> ~/.bashrc && \
     echo "source /etc/profile.d/alias.sh" >> ~/.bashrc
 
-    # Step 2: Install dependencies
+##############################
+# SET PACKAGES
+##############################
 RUN apt-get update && \
     apt-get install -y \
+    git \
     build-essential cmake g++ gdb && \
     apt-get clean
+
+RUN git config --global user.name $GITHUB_NAME && \
+    git config --global user.email $GITHUB_EMAIL
+    
+USER $USERNAME

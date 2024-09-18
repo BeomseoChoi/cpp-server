@@ -6,7 +6,9 @@ services:
     build:
       context: ../ # Project Directory. The current path in a Dockerfile will be set to the context, NOT the directory where Dockerfile is.
       dockerfile: docker/cpp-server/Dockerfile.cpp-server # Relative to the context
-    working_dir: /root/project
+    working_dir: /home/beomseochoi/project
     volumes:
-      - ../:/root/project
+      - ~/.ssh:/root/.ssh
+      - ../:/home/beomseochoi/project
+
     tty: true

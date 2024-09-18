@@ -3,7 +3,7 @@
 {
 	"name": "cpp-server",
 	"dockerComposeFile": ["../docker/docker-compose.cpp-server.yml"],
-	"workspaceFolder": "/root/project",
+	"workspaceFolder": "/home/beomseochoi/project",
 	"service": "service.cpp-server",
 	
 	"customizations": {
@@ -13,4 +13,5 @@
 			]
 		}
 	}
+
 }
