@@ -1,3 +1,4 @@
+#pragma once
 #include "core/server.h"
 
 namespace app {
