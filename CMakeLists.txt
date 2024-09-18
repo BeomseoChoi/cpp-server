@@ -22,7 +22,6 @@ file(GLOB_RECURSE SOURCES
 list(APPEND SOURCES ${PROJECT_SOURCE_DIR}/lib/pugixml-1.14/src/pugixml.cpp)
 include_directories(${PROJECT_SOURCE_DIR}/lib/pugixml-1.14/include)
 list(APPEND SOURCES ${PROJECT_SOURCE_DIR}/lib/xxml/src/xxml.cpp)
-list(APPEND SOURCES ${PROJECT_SOURCE_DIR}/lib/xxml/src/xxml_stream_reader.cpp)
 include_directories(${PROJECT_SOURCE_DIR}/lib/xxml/include)
 
 find_package(EXPAT REQUIRED)
