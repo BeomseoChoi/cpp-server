@@ -1,7 +1,8 @@
 #pragma once
 
-namespace xxml{
-    bool validate(const std::string& xml);
+namespace xxml
+{
+    bool validate(const std::string &xml);
 }
 namespace xxml::builder
 {
@@ -14,30 +15,129 @@ namespace xxml::builder
     public:
         enum class Type
         {
+            doc,
+            decl,
+            tag,
+            attr,
             text,
-            tag
+            close
         };
 
     public:
-        XmlContent(xxml::builder::XmlContent::Type type, int level);
-        virtual ~XmlContent() = 0;
+        XmlContent(xxml::builder::XmlContent::Type type)
+            : type(type)
+        {
 
-    public:
-        virtual std::string build() = 0;
+        }
+        virtual ~XmlContent() = default;
 
-    protected:
-        xxml::builder::XmlContent::Type get_type();
-        int get_level();
-
-        void align_tab(std::stringstream &xml);
-        bool validate_no_space(const std::string &input);
-        std::string replace_to_entity_reference(const std::string &input);
+        xxml::builder::XmlContent::Type get_type()
+        {
+            return type;
+        }
 
     private:
         xxml::builder::XmlContent::Type type;
-        int level;
+    };
+
+    //////////////////////////////
+    // XML DECLARATION
+    //////////////////////////////
+    class Declaration : public XmlContent
+    {
+    public:
+        Declaration(const std::string_view version, const std::string_view encoding = "UTF-8", const std::string_view standalone = "no")
+            : XmlContent(xxml::builder::XmlContent::Type::decl), version(version), encoding(encoding), standalone(standalone)
+        {
+        }
+        virtual ~Declaration() override = default;
+
+        const std::string_view get_version() const
+        {
+            return version;
+        }
+        const std::string_view get_encoding() const
+        {
+            return encoding;
+        }
+        const std::string_view get_standalone() const
+        {
+            return standalone;
+        }
+    private:
+        std::string version;
+        std::string encoding;
+        std::string standalone;
+    };
+
+    //////////////////////////////
+    // TAG
+    //////////////////////////////
+    enum class TagType
+    {
+        regular,
+        self_closing,
+        menual_closing
+    };
+    
+    class Tag : public XmlContent, public std::enable_shared_from_this<xxml::builder::Tag>
+    {
+    public:
+        Tag(const std::string_view name, xxml::builder::TagType type)
+            : XmlContent(xxml::builder::XmlContent::Type::tag), name(name), type(type), open(true)
+        {
+        }
+        virtual ~Tag() override = default;
+
+        const std::string_view get_name() const
+        {
+            return name;
+        }
+        xxml::builder::TagType get_tag_type() const
+        {
+            return type;
+        }
+
+        bool is_open() const
+        {
+            return open;
+        }
+
+        void close_open_tag() 
+        {
+            open = false;
+        }
 
 
+    private:
+        std::string name;
+        xxml::builder::TagType type;
+        bool open;
+    };
+    //////////////////////////////
+    // ATTRIBUTE
+    //////////////////////////////
+    class Attribute : public XmlContent, public std::enable_shared_from_this<Attribute>
+    {
+    public:
+        Attribute(const std::string_view attr_name, const std::string_view attr_value)
+            : XmlContent(xxml::builder::XmlContent::Type::attr), attr_name(attr_name), attr_value(attr_value)
+        {
+        }
+        virtual ~Attribute() override = default;
+
+        const std::string_view get_name() const
+        {
+            return attr_name;
+        }
+        const std::string_view get_value() const
+        {
+            return attr_value;
+        }
+
+    private:
+        std::string attr_name;
+        std::string attr_value;
     };
 
     //////////////////////////////
@@ -46,67 +146,93 @@ namespace xxml::builder
     class Text : public XmlContent, public std::enable_shared_from_this<Text>
     {
     public:
-        Text(const char *text, int level);
-        virtual ~Text() override;
+        Text(const std::string_view text)
+            : XmlContent(xxml::builder::XmlContent::Type::text), text(text)
+        {
+        }
 
-    public:
-        virtual std::string build() override;
+        virtual ~Text() override = default;
 
+        const std::string_view get_text() const
+        {
+            return text;
+        }
     private:
         std::string text;
     };
 
     //////////////////////////////
-    // TAG
+    // CLOSE
     //////////////////////////////
-    class Tag : public XmlContent, public std::enable_shared_from_this<Tag>
+    class Close : public XmlContent, public std::enable_shared_from_this<Close>
     {
     public:
-        enum class End
+        Close()
+            : XmlContent(xxml::builder::XmlContent::Type::close)
         {
-            regular,
-            self_closing
-        };
+        }
 
-    public:
-        Tag(std::shared_ptr<xxml::builder::Tag> parents, const char *name, xxml::builder::Tag::End end, int level);
-        virtual ~Tag() override;
-
-    public:
-        std::shared_ptr<xxml::builder::Tag> tag(const char *name, xxml::builder::Tag::End end);
-        std::shared_ptr<xxml::builder::Tag> attribute(const char *attr, const char *value);
-        std::shared_ptr<xxml::builder::Tag> text(const char *value);
-        std::shared_ptr<xxml::builder::Tag> close();
-
-        virtual std::string build() override;
-
-    private:
-    protected:
-        std::weak_ptr<xxml::builder::Tag> parents;
-        std::vector<std::shared_ptr<xxml::builder::XmlContent>> children;
-
-    private:
-        std::string name;
-        xxml::builder::Tag::End end;
-        std::vector<std::pair<std::string, std::string>> attributes;
+        virtual ~Close() override = default;
     };
 
     //////////////////////////////
     // BUILDER
     //////////////////////////////
-    class Builder : public xxml::builder::Tag
+    class XmlDoc : public std::enable_shared_from_this<XmlDoc>
     {
     public:
-        Builder();
-        virtual ~Builder() override = default;
+        XmlDoc() = default;
+        ~XmlDoc() = default;
 
     public:
-        std::shared_ptr<xxml::builder::Tag> attribute(const char *attr, const char *value) = delete;
-        std::shared_ptr<xxml::builder::Tag> value(const char *value) = delete;
-        std::shared_ptr<xxml::builder::Tag> close() = delete;
+        std::shared_ptr<xxml::builder::XmlDoc> declaration(const std::string_view version, const std::string_view encoding = "UTF-8", const std::string_view standalone = "no")
+        {
+            std::shared_ptr<xxml::builder::XmlContent> new_tag = std::make_shared<xxml::builder::Declaration>(version, encoding, standalone);
+            contents.push_back(new_tag);
+
+            return shared_from_this();
+        }
+
+        std::shared_ptr<xxml::builder::XmlDoc> tag(const std::string_view tag_name, const xxml::builder::TagType type)
+        {
+            std::shared_ptr<xxml::builder::XmlContent> new_tag = std::make_shared<xxml::builder::Tag>(tag_name, type);
+            contents.push_back(new_tag);
+            tag_map[tag_name] = new_tag;
+
+            return shared_from_this();
+        }
+
+        std::shared_ptr<xxml::builder::XmlDoc> attribute(const std::string_view attr_name, const std::string_view attr_value)
+        {
+            std::shared_ptr<xxml::builder::XmlContent> new_attr = std::make_shared<xxml::builder::Attribute>(attr_name, attr_value);
+            contents.push_back(new_attr);
+
+            return shared_from_this();
+        }
+
+        std::shared_ptr<xxml::builder::XmlDoc> text(const std::string_view text_value)
+        {
+            std::shared_ptr<xxml::builder::XmlContent> new_text = std::make_shared<xxml::builder::Text>(text_value);
+            contents.push_back(new_text);
+
+            return shared_from_this();
+        }
+
+        std::shared_ptr<xxml::builder::XmlDoc> close()
+        {
+            std::shared_ptr<xxml::builder::XmlContent> new_close = std::make_shared<xxml::builder::Close>();
+            contents.push_back(new_close);
+
+            return shared_from_this();
+        }
+
+    private:
+        std::unordered_map<std::string_view, std::shared_ptr<xxml::builder::XmlContent>> tag_map;
 
     public:
-        virtual std::string build() override;
+        std::string build();
+        void close_open_tag(std::stringstream& ss, std::shared_ptr<xxml::builder::Tag> tag);
+    private:
+        std::vector<std::shared_ptr<xxml::builder::XmlContent>> contents;
     };
-
 }
