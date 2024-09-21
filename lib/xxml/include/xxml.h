@@ -1,9 +1,5 @@
 #pragma once
 
-namespace xxml
-{
-    bool validate(const std::string &xml);
-}
 namespace xxml::builder
 {
 
@@ -235,4 +231,10 @@ namespace xxml::builder
     private:
         std::vector<std::shared_ptr<xxml::builder::XmlContent>> contents;
     };
+}
+
+namespace xxml
+{
+    std::shared_ptr<xxml::builder::XmlDoc> get_builder();
+    bool validate(const std::string &xml);
 }
