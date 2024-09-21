@@ -80,8 +80,16 @@ std::string xxml::builder::XmlDoc::build(const int base_level)
             xxml::builder::TagType recent_tag_type = recent_tag->get_tag_type();
 
             ALIGN_TAB(type);
-            tag_stack.pop_back();
+
             std::shared_ptr<xxml::builder::Close> close = std::static_pointer_cast<xxml::builder::Close>(content);
+
+            if (!close->get_text().empty())
+            {
+                ss << "</" << close->get_text() << ">\n";
+                continue;
+            }
+
+            tag_stack.pop_back();
 
             if (recent_tag_type == xxml::builder::TagType::regular)
             {

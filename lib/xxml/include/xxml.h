@@ -165,12 +165,20 @@ namespace xxml::builder
     class Close : public XmlContent, public std::enable_shared_from_this<Close>
     {
     public:
-        Close()
-            : XmlContent(xxml::builder::XmlContent::Type::close)
+        Close(const std::string_view text_value = "")
+            : XmlContent(xxml::builder::XmlContent::Type::close), text(text_value)
         {
         }
 
         virtual ~Close() override = default;
+
+        const std::string_view get_text() const
+        {
+            return text;
+        }
+
+    private:
+        std::string text;
     };
 
 
@@ -245,9 +253,12 @@ namespace xxml::builder
             return shared_from_this();
         }
 
-        std::shared_ptr<xxml::builder::XmlDoc> close()
+        std::shared_ptr<xxml::builder::XmlDoc> close(const std::string_view text_value = "")
         {
-            std::shared_ptr<xxml::builder::XmlContent> new_close = std::make_shared<xxml::builder::Close>();
+            // The close with text_value is kind of hack for a menual end tag.
+            // This should be used at the end of xml, I believe.
+            // 
+            std::shared_ptr<xxml::builder::XmlContent> new_close = std::make_shared<xxml::builder::Close>(text_value);
             contents.push_back(new_close);
 
             return shared_from_this();
