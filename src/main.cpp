@@ -18,7 +18,8 @@ int main()
         "jabber:client",
         "http://etherx.jabber.org/streams");
 
-    str = xmpp::features({xmpp::starttls(true), xmpp::starttls(false), xmpp::starttls(true)});
+    // str = xmpp::features({xmpp::starttls(true), xmpp::starttls(false), xmpp::starttls(true)});
+    str = xmpp::failure_starttls();
 
     std::cout << str << "\n";
 

@@ -59,7 +59,7 @@ std::string xmpp::features(const std::vector<std::string_view> feats)
     return result;
 }
 
-std::string xmpp::starttls(bool required)
+std::string xmpp::initiate_starttls(bool required)
 {
     auto xml = xxml::get_builder();
 
@@ -77,6 +77,30 @@ std::string xmpp::starttls(bool required)
             ->attribute("xmlns", "urn:ietf:params:xml:ns:xmpp-tls")
             ->close();
     }
+
+    std::string result = xml->build();
+
+    return result;
+}
+
+std::string xmpp::proceed_starttls()
+{
+    auto xml = xxml::get_builder();
+    xml->tag("proceed", xxml::builder::TagType::self_closing)
+        ->attribute("xmlns", "urn:ietf:params:xml:ns:xmpp-tls")
+        ->close();
+
+    std::string result = xml->build();
+
+    return result;
+}
+
+std::string xmpp::failure_starttls()
+{
+    auto xml = xxml::get_builder();
+    xml->tag("failure ", xxml::builder::TagType::self_closing)
+        ->attribute("xmlns", "urn:ietf:params:xml:ns:xmpp-tls")
+        ->close("stream:features");
 
     std::string result = xml->build();
 

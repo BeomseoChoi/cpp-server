@@ -44,7 +44,9 @@ namespace xmpp
         const std::string_view xmlns_stream = "http://etherx.jabber.org/streams");
 
     std::string features(const std::vector<std::string_view> feats);
-    std::string starttls(bool required = false);
+    std::string initiate_starttls(bool required = false);
+    std::string proceed_starttls();
+    std::string failure_starttls();
 
 
 
