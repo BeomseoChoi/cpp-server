@@ -18,13 +18,9 @@ int main()
         "jabber:client",
         "http://etherx.jabber.org/streams");
 
-    str = xmpp::starttls();
-
+    str = xmpp::features({xmpp::starttls(true), xmpp::starttls(false), xmpp::starttls(true)});
 
     std::cout << str << "\n";
-
-
-
 
     XML_Parser parser = XML_ParserCreate(NULL);
     if (!parser) {
@@ -32,7 +28,7 @@ int main()
         return 1;
     }
     XML_SetElementHandler(parser, startElement, endElement);
-    XML_SetCharacterDataHandler(parser, characterData);
+    // XML_SetCharacterDataHandler(parser, characterData);
     int done;
 
     do {

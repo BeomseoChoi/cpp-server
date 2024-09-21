@@ -43,7 +43,8 @@ namespace xmpp
         const std::string_view xmlns = "jabber:client",
         const std::string_view xmlns_stream = "http://etherx.jabber.org/streams");
 
-    std::string starttls();
+    std::string features(const std::vector<std::string_view> feats);
+    std::string starttls(bool required = false);
 
 
 
