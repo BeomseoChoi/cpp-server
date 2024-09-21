@@ -12,6 +12,7 @@ namespace xxml::builder
         enum class Type
         {
             xml,
+            pre_builded_xml,
             doc,
             decl,
             tag,
@@ -172,6 +173,30 @@ namespace xxml::builder
         virtual ~Close() override = default;
     };
 
+
+    //////////////////////////////
+    // PRE-BUILDED XML
+    //////////////////////////////
+    class PreBuildedXml : public XmlContent, public std::enable_shared_from_this<PreBuildedXml>
+    {
+    public:
+        PreBuildedXml(const std::string_view text)
+            : XmlContent(xxml::builder::XmlContent::Type::pre_builded_xml), text(text)
+        {
+        }
+
+        virtual ~PreBuildedXml() override = default;
+
+        const std::string_view get_text() const
+        {
+            return text;
+        }
+
+    private:
+        std::string text;
+    };
+
+
     //////////////////////////////
     // BUILDER
     //////////////////////////////
@@ -234,6 +259,15 @@ namespace xxml::builder
 
             return shared_from_this();
         }
+        
+        std::shared_ptr<xxml::builder::XmlDoc> pre_builded_xml(const std::string_view pre_builded_xml)
+        {
+            std::shared_ptr<xxml::builder::XmlContent> new_pre_builded_xml = std::make_shared<xxml::builder::PreBuildedXml>(pre_builded_xml);
+            contents.push_back(new_pre_builded_xml);
+
+            return shared_from_this();
+        }
+
 #pragma endregion
 
     private:

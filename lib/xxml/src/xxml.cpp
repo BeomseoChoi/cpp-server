@@ -16,7 +16,7 @@ std::string xxml::builder::XmlDoc::build(const int base_level)
     for (int i = 0; i < base_level + tag_stack.size(); ++i) \
     {                                                       \
         ss << '\t';                                         \
-    }                                                       \
+    }
 
     for (std::shared_ptr<xxml::builder::XmlContent> content : contents)
     {
@@ -50,7 +50,6 @@ std::string xxml::builder::XmlDoc::build(const int base_level)
             {
                 ss << " />\n";
             }
-
         }
         else if (type == xxml::builder::XmlContent::Type::attr)
         {
@@ -97,6 +96,24 @@ std::string xxml::builder::XmlDoc::build(const int base_level)
             }
             std::shared_ptr<xxml::builder::XmlDoc> xml = std::static_pointer_cast<xxml::builder::XmlDoc>(content);
             ss << xml->build(tag_stack.size());
+        }
+        else if (type == xxml::builder::XmlContent::Type::pre_builded_xml)
+        {
+            if (recent_tag && recent_tag->is_open())
+            {
+                close_open_tag(ss, recent_tag);
+            }
+
+            std::shared_ptr<xxml::builder::Text> text = std::static_pointer_cast<xxml::builder::Text>(content);
+            std::string pre_builded_xml = std::string(text->get_text());
+
+            std::string line = "";
+            std::istringstream iss(pre_builded_xml);
+            while (std::getline(iss, line))
+            {
+                ALIGN_TAB();
+                ss << line << "\n";
+            }
         }
     }
 
