@@ -12,15 +12,26 @@ std::string xxml::builder::XmlDoc::build(const int base_level)
     std::shared_ptr<xxml::builder::Tag> recent_tag;
     std::stringstream ss;
 
-#define ALIGN_TAB()                                         \
-    for (int i = 0; i < base_level + tag_stack.size(); ++i) \
-    {                                                       \
-        ss << '\t';                                         \
-    }
+#define ALIGN_TAB(type)                                                                                  \
+    int closing = 0;                                                                                     \
+    if ((type) == xxml::builder::XmlContent::Type::close)                                                \
+    {                                                                                                    \
+        closing = 1;                                                                                     \
+    }                                                                                                    \
+    int self_closing = 0;                                                                                \
+    if (!tag_stack.empty())                                                                              \
+    {                                                                                                    \
+        self_closing = tag_stack.back()->get_tag_type() == xxml::builder::TagType::self_closing ? 1 : 0; \
+    }                                                                                                    \
+    int loop_count = base_level + tag_stack.size() - self_closing - closing;                             \
+    for (int i = 0; i < loop_count; ++i)                                                                 \
+    {                                                                                                    \
+        ss << '\t';                                                                                      \
+    }                                                                                                    \
 
     for (std::shared_ptr<xxml::builder::XmlContent> content : contents)
     {
-        tag_stack.empty() ? recent_tag = nullptr : recent_tag = tag_stack.back();
+        recent_tag = tag_stack.empty() ? nullptr : tag_stack.back();
         xxml::builder::XmlContent::Type type = content->get_type();
 
         if (type == xxml::builder::XmlContent::Type::decl)
@@ -38,18 +49,11 @@ std::string xxml::builder::XmlDoc::build(const int base_level)
             std::shared_ptr<xxml::builder::Tag> tag = std::static_pointer_cast<xxml::builder::Tag>(content);
             xxml::builder::TagType tag_type = tag->get_tag_type();
 
-            ALIGN_TAB();
+            ALIGN_TAB(type);
 
             ss << "<" << tag->get_name();
 
-            if (tag_type == xxml::builder::TagType::regular || tag_type == xxml::builder::TagType::menual_closing)
-            {
-                tag_stack.push_back(tag);
-            }
-            else
-            {
-                ss << " />\n";
-            }
+            tag_stack.push_back(tag);
         }
         else if (type == xxml::builder::XmlContent::Type::attr)
         {
@@ -63,7 +67,7 @@ std::string xxml::builder::XmlDoc::build(const int base_level)
                 close_open_tag(ss, recent_tag);
             }
 
-            ALIGN_TAB();
+            ALIGN_TAB(type);
             std::shared_ptr<xxml::builder::Text> text = std::static_pointer_cast<xxml::builder::Text>(content);
             ss << " " << text->get_text();
         }
@@ -73,12 +77,12 @@ std::string xxml::builder::XmlDoc::build(const int base_level)
             {
                 close_open_tag(ss, recent_tag);
             }
+            xxml::builder::TagType recent_tag_type = recent_tag->get_tag_type();
 
+            ALIGN_TAB(type);
             tag_stack.pop_back();
-            ALIGN_TAB();
             std::shared_ptr<xxml::builder::Close> close = std::static_pointer_cast<xxml::builder::Close>(content);
 
-            xxml::builder::TagType recent_tag_type = recent_tag->get_tag_type();
             if (recent_tag_type == xxml::builder::TagType::regular)
             {
                 ss << "</" << recent_tag->get_name() << ">\n";
@@ -111,7 +115,7 @@ std::string xxml::builder::XmlDoc::build(const int base_level)
             std::istringstream iss(pre_builded_xml);
             while (std::getline(iss, line))
             {
-                ALIGN_TAB();
+                ALIGN_TAB(type);
                 ss << line << "\n";
             }
         }
