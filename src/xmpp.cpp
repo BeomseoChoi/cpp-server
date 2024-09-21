@@ -83,6 +83,16 @@ std::string xmpp::initiate_starttls(bool required)
     return result;
 }
 
+std::string xmpp::close_stream()
+{
+    auto xml = xxml::get_builder();
+    xml->close("stream:stream");
+
+    std::string result = xml->build();
+
+    return result;
+}
+
 std::string xmpp::proceed_starttls()
 {
     auto xml = xxml::get_builder();
@@ -101,6 +111,130 @@ std::string xmpp::failure_starttls()
     xml->tag("failure ", xxml::builder::TagType::self_closing)
         ->attribute("xmlns", "urn:ietf:params:xml:ns:xmpp-tls")
         ->close("stream:features");
+
+    std::string result = xml->build();
+
+    return result;
+}
+
+std::string xmpp::info_query(const std::string_view id, const std::string_view type, const std::vector<std::string_view> feats)
+{
+    auto xml = xxml::get_builder();
+    xml->tag("iq", xxml::builder::TagType::regular);
+
+    for (const std::string_view feat : feats)
+    {
+        xml->pre_builded_xml(feat);
+    }
+
+    xml->close();
+
+    std::string result = xml->build();
+
+    return result;
+}
+
+std::string xmpp::message(const std::string_view to, const std::string_view message, const std::vector<std::string_view> feats)
+{
+    auto xml = xxml::get_builder();
+    xml->tag("message", xxml::builder::TagType::regular);
+
+    for (const std::string_view feat : feats)
+    {
+        xml->pre_builded_xml(feat);
+    }
+
+    xml->close();
+
+    std::string result = xml->build();
+
+    return result;
+}
+
+std::string xmpp::bind()
+{
+    auto xml = xxml::get_builder();
+    xml->tag("bind", xxml::builder::TagType::self_closing)
+        ->attribute("xmlns", "urn:ietf:params:xml:ns:xmpp-bind")
+        ->close();
+
+    std::string result = xml->build();
+
+    return result;
+}
+
+std::string xmpp::bind(const std::vector<std::string_view> feats)
+{
+    auto xml = xxml::get_builder();
+    xml->tag("bind", xxml::builder::TagType::regular);
+
+    for (const std::string_view feat : feats)
+    {
+        xml->pre_builded_xml(feat);
+    }
+
+    xml->close();
+
+    std::string result = xml->build();
+
+    return result;
+}
+
+std::string xmpp::jid(const std::string_view jid)
+{
+    auto xml = xxml::get_builder();
+    xml->tag("bind", xxml::builder::TagType::regular)
+        ->text(jid)
+        ->close();
+
+    std::string result = xml->build();
+
+    return result;
+}
+
+std::string xmpp::jid(const std::string_view local, const std::string_view domain, const std::string_view resource)
+{
+    std::string full_jid = "";
+    full_jid += local;
+    full_jid += "@";
+    full_jid += domain;
+    full_jid += "/";
+    full_jid += resource;
+
+    return jid(full_jid);
+}
+
+std::string xmpp::jid(const std::string_view local_domain, const std::string_view resource)
+{
+    std::string full_jid = "";
+    full_jid += local_domain;
+    full_jid += "/";
+    full_jid += resource;
+
+    return jid(full_jid);
+}
+
+std::string xmpp::error(const std::string_view type)
+{
+    auto xml = xxml::get_builder();
+    xml->tag("error", xxml::builder::TagType::regular)
+        ->attribute("type", type)
+        ->tag("conflict", xxml::builder::TagType::regular)
+        ->attribute("xmlns", "urn:ietf:params:xml:ns:xmpp-stanzas")
+        ->close()
+        ->close();
+
+    std::string result = xml->build();
+
+    return result;
+}
+
+std::string xmpp::body(const std::string_view text)
+{
+    auto xml = xxml::get_builder();
+    xml->tag("body", xxml::builder::TagType::regular)
+        ->text(text)
+        ->close();
 
     std::string result = xml->build();
 

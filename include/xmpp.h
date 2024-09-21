@@ -1,16 +1,15 @@
 #pragma once
 
-
 namespace xmpp
 {
     /**
      * The initiating entity opens by sending a stream.
      * The receiving entity replies by sending a stream.
-     * 
+     *
      * If initial stream inlcudes the version attribute at least 1.0, then MUST reply a <feature/> child element to announce any conditions for continuation of stream negoation process.
      * A condition is a <features/> element. A condition can contain zero or more <features/> child.
      * The order of child elements that contains <features/> is not significant.
-     * 
+     *
      * Mandatory-to-negotiate (m2n)
      * Voluntary-to-negotiate (v2n)
      * 1. 동일 단계에서 m2n이 여러개 전송되면 클라이언트는 옵션으로 받아들임. 그 중 선택해서 협상하는 것.
@@ -18,14 +17,14 @@ namespace xmpp
      * 3. feature에 m2n이랑 v2n이 동시에 존재할 수 있음.
      * 4. feature에 v2n만 있으면 협상은 이미 끝났고, 추가적인 협상을 진행할 수 있음. 그리고 XML stanza를 보낼 수 있는 상황
      * 5. <features/>를 보내면 협상이 완전이 끝나고 stanza를 보내는 차례임을 말함.
-     * 
+     *
      * 스트림을 재시작해야하는 feature가 협상될 때, 기존 스트림을 버리거나 </stream>을 보내지 않고 새로운 스트림을 생성함. TCP 연결도 끊으면 안됨.
      * xml decl을 포함하는게 좋음.
      * 새로운 스트림 ID를 생성해야함. 이전과 달라야함.
-     * 
-     * 
+     *
+     *
      */
-    
+
     std::string initiate_stream(
         const std::string_view from,
         const std::string_view to,
@@ -33,7 +32,7 @@ namespace xmpp
         const std::string_view xml_lang = "en",
         const std::string_view xmlns = "jabber:client",
         const std::string_view xmlns_stream = "http://etherx.jabber.org/streams");
-        
+
     std::string reply_stream(
         const std::string_view from,
         const std::string_view to,
@@ -42,16 +41,23 @@ namespace xmpp
         const std::string_view xml_lang = "en",
         const std::string_view xmlns = "jabber:client",
         const std::string_view xmlns_stream = "http://etherx.jabber.org/streams");
+    
+    std::string close_stream();
 
     std::string features(const std::vector<std::string_view> feats);
+    std::string info_query(const std::string_view id, const std::string_view type, const std::vector<std::string_view> feats);
+    std::string message(const std::string_view to, const std::string_view message, const std::vector<std::string_view> feats);
+
     std::string initiate_starttls(bool required = false);
     std::string proceed_starttls();
     std::string failure_starttls();
+    std::string bind();
+    std::string bind(const std::vector<std::string_view> feats);
+    std::string jid(const std::string_view jid);
+    std::string jid(const std::string_view local, const std::string_view domain, const std::string_view resource);
+    std::string jid(const std::string_view local_domain, const std::string_view resource);
+    std::string error(const std::string_view type);
 
+    std::string body(const std::string_view text);
 
-
-    std::string message(
-        const std::string_view to,
-        const std::string_view message);
-    
 }
