@@ -11,6 +11,7 @@ namespace xxml::builder
     public:
         enum class Type
         {
+            xml,
             doc,
             decl,
             tag,
@@ -23,7 +24,6 @@ namespace xxml::builder
         XmlContent(xxml::builder::XmlContent::Type type)
             : type(type)
         {
-
         }
         virtual ~XmlContent() = default;
 
@@ -60,6 +60,7 @@ namespace xxml::builder
         {
             return standalone;
         }
+
     private:
         std::string version;
         std::string encoding;
@@ -75,7 +76,7 @@ namespace xxml::builder
         self_closing,
         menual_closing
     };
-    
+
     class Tag : public XmlContent, public std::enable_shared_from_this<xxml::builder::Tag>
     {
     public:
@@ -99,11 +100,10 @@ namespace xxml::builder
             return open;
         }
 
-        void close_open_tag() 
+        void close_open_tag()
         {
             open = false;
         }
-
 
     private:
         std::string name;
@@ -153,6 +153,7 @@ namespace xxml::builder
         {
             return text;
         }
+
     private:
         std::string text;
     };
@@ -174,12 +175,17 @@ namespace xxml::builder
     //////////////////////////////
     // BUILDER
     //////////////////////////////
-    class XmlDoc : public std::enable_shared_from_this<XmlDoc>
+    class XmlDoc : public XmlContent, public std::enable_shared_from_this<XmlDoc>
     {
     public:
-        XmlDoc() = default;
-        ~XmlDoc() = default;
+        XmlDoc()
+            : XmlContent(xxml::builder::XmlContent::Type::xml)
+        {
+        }
 
+        virtual ~XmlDoc() override = default;
+
+#pragma region Contents
     public:
         std::shared_ptr<xxml::builder::XmlDoc> declaration(const std::string_view version, const std::string_view encoding = "UTF-8", const std::string_view standalone = "no")
         {
@@ -222,12 +228,21 @@ namespace xxml::builder
             return shared_from_this();
         }
 
+        std::shared_ptr<xxml::builder::XmlDoc> xml(std::shared_ptr<xxml::builder::XmlDoc> new_xml)
+        {
+            contents.push_back(new_xml);
+
+            return shared_from_this();
+        }
+#pragma endregion
+
     private:
         std::unordered_map<std::string_view, std::shared_ptr<xxml::builder::XmlContent>> tag_map;
 
     public:
-        std::string build();
-        void close_open_tag(std::stringstream& ss, std::shared_ptr<xxml::builder::Tag> tag);
+        std::string build(const int base_level = 0);
+        void close_open_tag(std::stringstream &ss, std::shared_ptr<xxml::builder::Tag> tag);
+
     private:
         std::vector<std::shared_ptr<xxml::builder::XmlContent>> contents;
     };

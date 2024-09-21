@@ -6,19 +6,17 @@
 #include <expat.h> // for validation
 #include "xxml.h"
 
-std::string xxml::builder::XmlDoc::build()
+std::string xxml::builder::XmlDoc::build(const int base_level)
 {
-    int level = -1;
-
     std::vector<std::shared_ptr<xxml::builder::Tag>> tag_stack;
     std::shared_ptr<xxml::builder::Tag> recent_tag;
     std::stringstream ss;
 
-#define ALIGN_TAB()                            \
-    for (int i = 0; i < tag_stack.size(); ++i) \
-    {                                          \
-        ss << '\t';                            \
-    }
+#define ALIGN_TAB()                                         \
+    for (int i = 0; i < base_level + tag_stack.size(); ++i) \
+    {                                                       \
+        ss << '\t';                                         \
+    }                                                       \
 
     for (std::shared_ptr<xxml::builder::XmlContent> content : contents)
     {
@@ -90,7 +88,15 @@ std::string xxml::builder::XmlDoc::build()
             {
                 ss << "</" << recent_tag->get_name() << ">\n";
             }
-
+        }
+        else if (type == xxml::builder::XmlContent::Type::xml)
+        {
+            if (recent_tag && recent_tag->is_open())
+            {
+                close_open_tag(ss, recent_tag);
+            }
+            std::shared_ptr<xxml::builder::XmlDoc> xml = std::static_pointer_cast<xxml::builder::XmlDoc>(content);
+            ss << xml->build(tag_stack.size());
         }
     }
 
